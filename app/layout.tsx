@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Serif } from "next/font/google";
 import "./globals.css";
@@ -10,8 +12,8 @@ const ibmPlexSerif = IBM_Plex_Serif({
 })
 
 export const metadata: Metadata = {
-  title: "Pulse",
-  description: "Pulse is a Productivity Dashboard for Developers.",
+  title: "Warp",
+  description: "Warp is a Productivity Dashboard for Developers.",
 };
 
 export default function RootLayout({
