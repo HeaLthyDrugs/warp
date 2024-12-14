@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background-color: #ffffff;
+  --text-color: #000000;
+}
+
+.dark {
+  --background-color: #121212;
+  --text-color: #ffffff;
+}
+
 * {
   margin: 0;
   padding: 0;
