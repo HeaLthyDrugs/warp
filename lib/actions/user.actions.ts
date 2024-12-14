@@ -9,30 +9,48 @@ import { parseStringify } from "../utils";
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,
   APPWRITE_USER_COLLECTION_ID: USER_COLLECTION_ID,
-  APPWRITE_BANK_COLLECTION_ID: BANK_COLLECTION_ID,
 } = process.env;
 
 export const getUserInfo = async ({ userId }: getUserInfoProps) => {
   try {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
     const { database } = await createAdminClient();
 
-    const user = await database.listDocuments(
+    const response = await database.listDocuments(
       DATABASE_ID!,
       USER_COLLECTION_ID!,
       [Query.equal('userId', [userId])]
-    )
+    );
 
-    return parseStringify(user.documents[0]);
+    if (!response || !response.documents || response.documents.length === 0) {
+      throw new Error('User not found');
+    }
+
+    return response.documents[0];
   } catch (error) {
-    console.log(error)
+    console.error('GetUserInfo Error:', error);
+    throw error;
   }
-}
+};
 
 export const signIn = async ({ email, password }: signInProps) => {
   try {
     const { account } = await createAdminClient();
+    
+    if (!email || !password) {
+      throw new Error('Email and password are required');
+    }
+
     const session = await account.createEmailPasswordSession(email, password);
 
+    if (!session) {
+      throw new Error('Failed to create session');
+    }
+
+    // Set the session cookie
     (await cookies()).set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,
@@ -40,45 +58,59 @@ export const signIn = async ({ email, password }: signInProps) => {
       secure: true,
     });
 
-    const user = await getUserInfo({ userId: session.userId }) 
+    // Get user info
+    const user = await getUserInfo({ userId: session.userId });
 
-    return parseStringify(user);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const parsedUser = parseStringify(user);
+    
+    if (!parsedUser) {
+      throw new Error('Error processing user data');
+    }
+
+    return parsedUser;
   } catch (error) {
-    console.error('Error', error);
+    console.error('SignIn Error:', error);
+    throw error;
   }
-}
+};
 
 export const signUp = async ({ password, ...userData }: SignUpParams) => {
   const { email, firstName, lastName } = userData;
   
-  let newUserAccount;
-
   try {
     const { account, database } = await createAdminClient();
 
-    newUserAccount = await account.create(
+    // Create user account
+    const newUserAccount = await account.create(
       ID.unique(), 
       email, 
       password, 
       `${firstName} ${lastName}`
     );
 
-    if(!newUserAccount) throw new Error('Error creating user')
+    if(!newUserAccount) throw new Error('Error creating user account');
 
-
-
+    // Create user document with only essential fields
     const newUser = await database.createDocument(
       DATABASE_ID!,
       USER_COLLECTION_ID!,
       ID.unique(),
       {
-        ...userData,
         userId: newUserAccount.$id,
-        }
-    )
+        firstName,
+        lastName,
+        email
+      }
+    );
 
+    // Create session
     const session = await account.createEmailPasswordSession(email, password);
 
+    // Set session cookie
     (await cookies()).set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,
@@ -88,7 +120,8 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
     return parseStringify(newUser);
   } catch (error) {
-    console.error('Error', error);
+    console.error('Signup error:', error);
+    throw error;
   }
 }
 
