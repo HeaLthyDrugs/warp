@@ -22,8 +22,9 @@ import {
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
+import { getLoggedInUser, signIn, signUp, signInWithGitHub } from '@/lib/actions/user.actions';
 import CustomInput from './CustomInput';
+import { FaGithub } from "react-icons/fa";
 
 
 const AuthForm = ({ type }: { type: string }) => {
@@ -85,6 +86,24 @@ const AuthForm = ({ type }: { type: string }) => {
         setIsLoading(false);
       }
     }
+
+  const handleGitHubSignIn = async () => {
+    try {
+      // Using localhost in the correct format
+      const baseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000'
+        : process.env.NEXT_PUBLIC_SITE_URL;
+
+      const successUrl = encodeURIComponent(`${baseUrl}/dashboard`);
+      const failureUrl = encodeURIComponent(`${baseUrl}/sign-in`);
+      
+      const redirectUrl = `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/account/sessions/oauth2/callback/github/${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}?success=${successUrl}&failure=${failureUrl}`;
+      
+      window.location.href = redirectUrl;
+    } catch (error) {
+      console.error('GitHub sign in error:', error);
+    }
+  };
 
   return (
     <section className="auth-form">
@@ -167,6 +186,27 @@ const AuthForm = ({ type }: { type: string }) => {
               {error}
             </div>
           )}
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            type="button"
+            onClick={handleGitHubSignIn}
+            className="flex items-center gap-2"
+          >
+            <FaGithub className="h-5 w-5" />
+            Continue with GitHub
+          </Button>
         </>
       )}
     </section>

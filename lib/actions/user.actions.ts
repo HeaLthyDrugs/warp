@@ -5,6 +5,8 @@ import { ID, Query } from "node-appwrite";
 import { cookies } from "next/headers";
 import { createAdminClient, createSessionClient } from "../appWrite";
 import { parseStringify } from "../utils";
+import { Client, Account, OAuthProvider } from "appwrite";
+
 
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -17,7 +19,11 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
       throw new Error('User ID is required');
     }
 
-    const { database } = await createAdminClient();
+    const { database, account } = await createAdminClient();
+
+    // Get GitHub account info
+    const githubAccount = await account.getSession('current');
+    const githubData = githubAccount.providerAccessToken; // This will contain GitHub access token
 
     const response = await database.listDocuments(
       DATABASE_ID!,
@@ -26,7 +32,31 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
     );
 
     if (!response || !response.documents || response.documents.length === 0) {
-      throw new Error('User not found');
+      // Create new user document if not exists
+      const newUser = await database.createDocument(
+        DATABASE_ID!,
+        USER_COLLECTION_ID!,
+        ID.unique(),
+        {
+          userId,
+          githubToken: githubData,
+          // Add other GitHub user data as needed
+        }
+      );
+      return newUser;
+    }
+
+    // Update existing user with GitHub data
+    const existingUser = response.documents[0];
+    if (!existingUser.githubToken) {
+      await database.updateDocument(
+        DATABASE_ID!,
+        USER_COLLECTION_ID!,
+        existingUser.$id,
+        {
+          githubToken: githubData,
+        }
+      );
     }
 
     return response.documents[0];
@@ -168,4 +198,20 @@ export const createLinkToken = async (user: User) => {
     console.log(error);
   }
 }
+
+export const signInWithGitHub = async () => {
+  try {
+    const { account } = await createAdminClient();
+    
+    const session = await account.createSession(
+      'github',
+      `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
+    );
+
+    return parseStringify(session);
+  } catch (error) {
+    console.error('GitHub SignIn Error:', error);
+    throw error;
+  }
+};
 
