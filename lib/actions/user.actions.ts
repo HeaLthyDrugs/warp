@@ -19,11 +19,7 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
       throw new Error('User ID is required');
     }
 
-    const { database, account } = await createAdminClient();
-
-    // Get GitHub account info
-    const githubAccount = await account.getSession('current');
-    const githubData = githubAccount.providerAccessToken; // This will contain GitHub access token
+    const { database } = await createAdminClient();
 
     const response = await database.listDocuments(
       DATABASE_ID!,
@@ -39,24 +35,10 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
         ID.unique(),
         {
           userId,
-          githubToken: githubData,
-          // Add other GitHub user data as needed
+          // Remove GitHub specific fields for now
         }
       );
       return newUser;
-    }
-
-    // Update existing user with GitHub data
-    const existingUser = response.documents[0];
-    if (!existingUser.githubToken) {
-      await database.updateDocument(
-        DATABASE_ID!,
-        USER_COLLECTION_ID!,
-        existingUser.$id,
-        {
-          githubToken: githubData,
-        }
-      );
     }
 
     return response.documents[0];
@@ -157,14 +139,15 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
 export async function getLoggedInUser() {
   try {
-    const { account } = await createSessionClient();
-    const result = await account.get();
+    const { account } = createClient();
+    const session = await account.getSession('current');
+    
+    if (!session) return null;
 
-    const user = await getUserInfo({ userId: result.$id})
-
+    const user = await getUserInfo({ userId: session.userId });
     return parseStringify(user);
   } catch (error) {
-    console.log(error)
+    console.log('GetLoggedInUser Error:', error);
     return null;
   }
 }
@@ -199,19 +182,30 @@ export const createLinkToken = async (user: User) => {
   }
 }
 
-export const signInWithGitHub = async () => {
-  try {
-    const { account } = await createAdminClient();
+// export const signInWithGitHub = async () => {
+//   try {
+//     const { account } = await createAdminClient();
     
-    const session = await account.createSession(
-      'github',
-      `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
-    );
+//     const session = await account.createOAuth2Session(
+//       OAuthProvider.Github,
+//       `${process.env.NEXT_PUBLIC_SITE_URL}/`,
+//       `${process.env.NEXT_PUBLIC_SITE_URL}/sign-in`
+//     );
 
-    return parseStringify(session);
-  } catch (error) {
-    console.error('GitHub SignIn Error:', error);
-    throw error;
-  }
-};
+//     if (session) {
+//       // Set the session cookie like we do in email/password auth
+//       (await cookies()).set("appwrite-session", session.secret, {
+//         path: "/",
+//         httpOnly: true,
+//         sameSite: "strict",
+//         secure: true,
+//       });
+//     }
+
+//     return parseStringify(session);
+//   } catch (error) {
+//     console.error('GitHub SignIn Error:', error);
+//     throw error;
+//   }
+// };
 

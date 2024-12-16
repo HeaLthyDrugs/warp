@@ -22,9 +22,12 @@ import {
 import { authFormSchema } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getLoggedInUser, signIn, signUp, signInWithGitHub } from '@/lib/actions/user.actions';
+import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
 import CustomInput from './CustomInput';
 import { FaGithub } from "react-icons/fa";
+import { account } from '@/lib/appwrite-config';
+import { OAuthProvider } from 'node-appwrite';
+import { Client, Account } from "appwrite";
 
 
 const AuthForm = ({ type }: { type: string }) => {
@@ -89,19 +92,20 @@ const AuthForm = ({ type }: { type: string }) => {
 
   const handleGitHubSignIn = async () => {
     try {
-      // Using localhost in the correct format
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000'
-        : process.env.NEXT_PUBLIC_SITE_URL;
+      const client = new Client()
+        .setEndpoint('https://cloud.appwrite.io/v1')
+        .setProject('6756e47f000db4e5ba7a');
 
-      const successUrl = encodeURIComponent(`${baseUrl}/dashboard`);
-      const failureUrl = encodeURIComponent(`${baseUrl}/sign-in`);
-      
-      const redirectUrl = `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/account/sessions/oauth2/callback/github/${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}?success=${successUrl}&failure=${failureUrl}`;
-      
-      window.location.href = redirectUrl;
+      const account = new Account(client);
+
+      await account.createOAuth2Session(
+        OAuthProvider.Github,
+        'http://localhost:3000',
+        'http://localhost:3000/sign-in'
+      );
     } catch (error) {
-      console.error('GitHub sign in error:', error);
+      console.error('GitHub auth error:', error);
+      setError('Failed to sign in with GitHub');
     }
   };
 

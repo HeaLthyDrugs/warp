@@ -3,41 +3,37 @@
 import { Client, Account, Databases, Users } from "node-appwrite";
 import { cookies } from "next/headers";
 
-export async function createSessionClient() {
+export const createSessionClient = async () => {
   const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!);
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!);
 
-  const session = (await cookies()).get("appwrite-session");
-
-  if (!session || !session.value) {
-    throw new Error("No session");
+  const account = new Account(client);
+  
+  try {
+    await account.get(); // Verify session exists
+    return { account };
+  } catch (error) {
+    return { account }; // Return account even if no session
   }
+};
 
-  client.setSession(session.value);
-
-  return {
-    get account() {
-      return new Account(client);
-    },
-  };
-}
-
-export async function createAdminClient() {
+export const createClient = () => {
   const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!)
-    .setKey(process.env.NEXT_APPWRITE_KEY!);
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!);
 
-  return {
-    get account() {
-      return new Account(client);
-    },
-    get database() {
-      return new Databases(client);
-    },
-    get user() {
-      return new Users(client);
-    }
+  return { client, account: new Account(client) };
+};
+
+export const createAdminClient = () => {
+  const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+    .setKey(process.env.APPWRITE_API_KEY!);
+
+  return { 
+    account: new Account(client),
+    database: new Databases(client)
   };
-}
+};
