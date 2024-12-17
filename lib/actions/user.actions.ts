@@ -3,9 +3,13 @@
 import { ID, Query } from "node-appwrite";
 
 import { cookies } from "next/headers";
-import { createAdminClient, createSessionClient } from "../appWrite";
+import { createAdminClient, createClient, createSessionClient } from "../appWrite";
 import { parseStringify } from "../utils";
 import { Client, Account, OAuthProvider } from "appwrite";
+import { redirect } from 'next/navigation';
+import { account } from '@/lib/appwrite-config';
+
+const APPWRITE_PROJECT_ID = '6756e47f000db4e5ba7a'
 
 
 const {
@@ -137,30 +141,43 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
   }
 }
 
-export async function getLoggedInUser() {
+export const getLoggedInUser = async () => {
   try {
-    const { account } = createClient();
-    const session = await account.getSession('current');
+    // Check if we have a session cookie
+    const sessionCookie = (await cookies()).get('appwrite_session');
     
-    if (!session) return null;
+    if (!sessionCookie) {
+      return null;
+    }
 
-    const user = await getUserInfo({ userId: session.userId });
-    return parseStringify(user);
+    const client = new Client()
+      .setEndpoint('https://cloud.appwrite.io/v1')
+      .setProject('6756e47f000db4e5ba7a')
+      .setSession(sessionCookie.value);
+    
+    const account = new Account(client);
+
+    try {
+      const user = await account.get();
+      return user;
+    } catch {
+      (await cookies()).delete('appwrite_session');
+      return null;
+    }
+
   } catch (error) {
-    console.log('GetLoggedInUser Error:', error);
+    console.error('GetLoggedInUser Error:', error);
     return null;
   }
-}
+};
 
 export const logoutAccount = async () => {
   try {
-    const { account } = await createSessionClient();
-
-    (await cookies()).delete('appwrite-session');
-
     await account.deleteSession('current');
+    return true;
   } catch (error) {
-    return null;
+    console.error('Logout Error:', error);
+    return false;
   }
 }
 
@@ -182,30 +199,56 @@ export const createLinkToken = async (user: User) => {
   }
 }
 
-// export const signInWithGitHub = async () => {
-//   try {
-//     const { account } = await createAdminClient();
+export const createOAuth2Session = async () => {
+  try {
+    const client = new Client()
+      .setEndpoint('https://cloud.appwrite.io/v1')
+      .setProject(APPWRITE_PROJECT_ID);
+
+    const account = new Account(client);
+
+    // Modify these URLs based on your environment
+    const redirectUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000'
+      : 'https://your-production-url.com';
+
+    const session = await account.createOAuth2Session(
+      OAuthProvider.Github,
+      redirectUrl,
+      `${redirectUrl}/connect`,
+      ['read:user', 'user:email', 'repo']
+    );
     
-//     const session = await account.createOAuth2Session(
-//       OAuthProvider.Github,
-//       `${process.env.NEXT_PUBLIC_SITE_URL}/`,
-//       `${process.env.NEXT_PUBLIC_SITE_URL}/sign-in`
-//     );
+    return session;
+  } catch (error) {
+    console.error('OAuth Session Error:', error);
+    throw error;
+  }
+}
 
-//     if (session) {
-//       // Set the session cookie like we do in email/password auth
-//       (await cookies()).set("appwrite-session", session.secret, {
-//         path: "/",
-//         httpOnly: true,
-//         sameSite: "strict",
-//         secure: true,
-//       });
-//     }
+export const getCurrentUser = async () => {
+  try {
+    // Create a new client instance with proper session
+    const client = new Client()
+      .setEndpoint('https://cloud.appwrite.io/v1')
+      .setProject(APPWRITE_PROJECT_ID);
+    
+    // Get the session cookie
+    const sessionCookie = (await cookies()).get('appwrite-session'); // Note: check the cookie name
+    
+    if (!sessionCookie) {
+      return null;
+    }
 
-//     return parseStringify(session);
-//   } catch (error) {
-//     console.error('GitHub SignIn Error:', error);
-//     throw error;
-//   }
-// };
+    // Set the session
+    client.setSession(sessionCookie.value);
+    const account = new Account(client);
+    
+    const user = await account.get();
+    return user;
+  } catch (error) {
+    console.error('Get Current User Error:', error);
+    return null;
+  }
+}
 
