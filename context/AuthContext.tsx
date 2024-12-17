@@ -2,6 +2,7 @@
 
 import { Models } from "node-appwrite";
 import { createContext, useContext } from "react";
+import { getCurrentUser } from "@/appwrite/appwrite.server";
 
 const defaultState: AuthContextType = {
   isAuth: false,

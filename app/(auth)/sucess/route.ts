@@ -1,5 +1,5 @@
 
-import { createAdminClient } from "@/appwrite/appwrite";
+import { createAdminClient } from "@/appwrite/appwrite.server";
 import { SESSION_KEY } from "@/consts";
 import { cookies, headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";

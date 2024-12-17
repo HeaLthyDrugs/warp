@@ -40,7 +40,6 @@ export async function createAdminClient(userAgent: string | null) {
     };
 }
 
-// Get Current loggedin user
 export async function getCurrentUser() {
     try {
         const session = (await cookies()).get(SESSION_KEY);
@@ -53,22 +52,4 @@ export async function getCurrentUser() {
         console.log('getCurrentUser error', error);
         return null;
     }
-}
-
-// Delete current session
-export async function deleteCurrentSession(userAgent: string | null) {
-    try {
-        const { account } = await createSessionClient(userAgent);
-        account.deleteSession('current');
-        deleteSession();
-        return {
-            success: true
-        };
-    } catch (error: any) {
-        console.log('deleteSession error', error);
-        return {
-            error: error.message
-        }
-    }
-}
-
+} 

@@ -1,5 +1,5 @@
 "use server";
-import { createAdminClient } from "@/appwrite/appwrite";
+import { createAdminClient } from "@/appwrite/appwrite.server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { OAuthProvider } from "node-appwrite";
