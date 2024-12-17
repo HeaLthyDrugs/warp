@@ -7,14 +7,79 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react';
 // import { createOAuth2Session } from '@/lib/actions/user.actions';
 import { FaGithub } from "react-icons/fa";
+import { useForm } from 'react-hook-form';
+import { RegisterFormType, signUpSchema } from '@/schema/signUpSchema';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signUpWithGithub } from '@/app/server/oauth';
+import { ToastAction } from './ui/toast';
 
 const AuthForm = ({ type }: { type: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signUpState, setSignUpState] = useState({isLoading: false, isSuccess: false, isError: false});
+  const [oAuth2State, setOAuth2State] = useState({isLoading: false, isSuccess: false, isError: false});
+  const form = useForm<RegisterFormType>({ resolver: zodResolver(signUpSchema) });
+  const { toast } = useToast();
+  const params = useSearchParams();
+  const router = useRouter();
 
-  const handleGitHubSignIn = async () => {
+  const onSubmit = async (values: RegisterFormType) => {
+    setSignUpState({isLoading: true, isSuccess: false, isError: false});
+    const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+    });
+    
+    switch (response.status) {
+        case 201: {
+            setSignUpState({isLoading: false, isSuccess: true, isError: false});
+            toast({
+                title: "Welcome aboard!",
+                description: "🌸 Let's plant your first green companion.",
+            });
+            router.replace('/map');
+            break;
+        }
 
-  };
+        case 409: {
+            setSignUpState({isLoading: false, isSuccess: false, isError: true});
+            toast({
+                variant: "default",
+                title: "Email is already registered",
+                description: "🍂 Please check your info or try to login.",
+            });
+            break;
+        }
+
+        default: {
+            setSignUpState({isLoading: false, isSuccess: false, isError: true});
+            toast({
+                variant: "destructive",
+                title: "Something's off!",
+                description: "🍂 Please check your info and sign up again.",
+            });
+            break;
+        }
+    }
+}
+
+const handleGithubAuth = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  try {
+    event.preventDefault();
+    setOAuth2State({ isLoading: true, isSuccess: false, isError: false });
+    await signUpWithGithub();
+  } catch (error) {
+    setOAuth2State({ isLoading: false, isSuccess: false, isError: true });
+    console.log("handle Github Auth error", error);
+  }
+};
+
 
   return (
     <section className="auth-form">
@@ -40,12 +105,12 @@ const AuthForm = ({ type }: { type: string }) => {
       </header>
 
       <div className="flex flex-col gap-4 mt-8">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
         <Button
           variant="outline"
-          type="button"
-          onClick={handleGitHubSignIn}
-          disabled={isLoading}
-          className="flex items-center gap-2 w-full"
+          disabled={oAuth2State.isLoading || signUpState.isLoading}
+           className="w-full"
+            onClick={handleGithubAuth}
         >
           {isLoading ? (
             <>
@@ -65,6 +130,7 @@ const AuthForm = ({ type }: { type: string }) => {
             {error}
           </div>
         )}
+        </form>
       </div>
     </section>
   )
