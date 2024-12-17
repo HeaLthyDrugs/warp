@@ -9,7 +9,7 @@ import Footer from './Footer'
 
 
 
-const Sidebar = ({ user }: SiderbarProps) => {
+const Sidebar = () => {
   const pathname = usePathname();
 
   return (
@@ -52,7 +52,7 @@ const Sidebar = ({ user }: SiderbarProps) => {
         
       </nav>
 
-      <Footer user={user} />
+      <Footer />
     </section>
   )
 }

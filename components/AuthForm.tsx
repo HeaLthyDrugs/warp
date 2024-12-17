@@ -5,7 +5,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react';
-import { createOAuth2Session } from '@/lib/actions/user.actions';
+// import { createOAuth2Session } from '@/lib/actions/user.actions';
 import { FaGithub } from "react-icons/fa";
 
 const AuthForm = ({ type }: { type: string }) => {
@@ -13,27 +13,7 @@ const AuthForm = ({ type }: { type: string }) => {
   const [error, setError] = useState<string | null>(null);
 
   const handleGitHubSignIn = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Direct browser redirect
-      window.location.href = 'https://cloud.appwrite.io/v1/account/sessions/oauth2/github?' +
-        new URLSearchParams({
-          project: '6756e47f000db4e5ba7a',
-          success: process.env.NODE_ENV === 'development' 
-            ? 'http://localhost:3000/'
-            : 'https://warp-sage.vercel.app/',
-          failure: process.env.NODE_ENV === 'development'
-            ? 'http://localhost:3000/connect'
-            : 'https://warp-sage.vercel.app/connect',
-        });
 
-    } catch (error) {
-      console.error('GitHub Sign In Error:', error);
-      setError('Failed to sign in with GitHub');
-      setIsLoading(false);
-    }
   };
 
   return (
