@@ -1,0 +1,42 @@
+graph TD
+    %% User Authentication Flow
+    U[User] -->|Login| A[Appwrite Auth]
+    A -->|Authenticate| U
+    A -->|Store User Data| AD[Appwrite Database]
+
+    %% GitHub Integration
+    G[GitHub API] -->|Fetch Metrics| GH[GitHub Handler]
+    GH -->|Process| GP[GitHub Processor]
+    GP -->|Store| AD
+    
+    %% Sentry Integration
+    S[Sentry] -->|Error Tracking| ST[Sentry Tracker]
+    ST -->|Process Errors| SP[Sentry Processor]
+    SP -->|Store| AD
+
+    %% Data Processing
+    AD -->|Fetch Data| DP[Data Processor]
+    DP -->|Process| DV[Data Visualizer]
+
+    %% Dashboard Components
+    DV -->|Display| D1[Dashboard]
+    DV -->|Display| D2[Performance Insights]
+    DV -->|Display| D3[Error Tracking]
+    DV -->|Display| D4[Team Analytics]
+
+    %% Real-time Updates
+    G -->|Webhooks| RT[Real-time Handler]
+    S -->|Alerts| RT
+    RT -->|Update| AD
+
+    %% Styling
+    classDef primary fill:#a5d8ff,stroke:#339af0,stroke-width:2px
+    classDef secondary fill:#ffd8a8,stroke:#ff922b,stroke-width:2px
+    classDef storage fill:#d3f9d8,stroke:#40c057,stroke-width:2px
+    classDef display fill:#fff3bf,stroke:#f59f00,stroke-width:2px
+
+    %% Apply styles
+    class A,U primary
+    class G,S,GH,ST secondary
+    class AD storage
+    class D1,D2,D3,D4 display
