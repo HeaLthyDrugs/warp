@@ -1,0 +1,65 @@
+erDiagram
+    Users ||--o{ UserPreferences : has
+    Users ||--o{ GitHubMetrics : tracks
+    Users ||--o{ ErrorLogs : monitors
+    Users ||--o{ Tasks : manages
+    Users ||--o{ ProductivityScores : calculates
+
+    Users {
+        string id PK
+        string email
+        string fullName
+        string githubUsername
+        string role
+        timestamp createdAt
+        timestamp lastLogin
+    }
+
+    UserPreferences {
+        string id PK
+        string userId FK
+        json themePreferences
+        json notifications
+        json dashboardLayout
+        timestamp updatedAt
+    }
+
+    GitHubMetrics {
+        string id PK
+        string userId FK
+        int commitCount
+        int prCount
+        float codingHours
+        json repoActivities
+        timestamp recordedAt
+    }
+
+    ErrorLogs {
+        string id PK
+        string userId FK
+        string errorType
+        string message
+        string stackTrace
+        string severity
+        timestamp occurredAt
+    }
+
+    Tasks {
+        string id PK
+        string userId FK
+        string title
+        string description
+        string status
+        string priority
+        timestamp dueDate
+        timestamp createdAt
+    }
+
+    ProductivityScores {
+        string id PK
+        string userId FK
+        float dailyScore
+        float weeklyAverage
+        json metrics
+        timestamp calculatedAt
+    }
