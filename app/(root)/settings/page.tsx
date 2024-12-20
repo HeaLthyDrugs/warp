@@ -12,23 +12,31 @@ const Settings = () => {
   const { user } = useAuth();
   const router = useRouter();
 
-  const handleLogout = async () => {
+  async function logOut() {
     try {
-      await deleteCurrentSession("");
-      
-      // Force clear cookies and reload
-      document.cookie.split(";").forEach((cookie) => {
-        document.cookie = cookie
-          .replace(/^ +/, "")
-          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
-      });
-      
-      // Force a complete reload and redirect
-      window.location.href = "/connect";
+        const res = await fetch(`/logout`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error('Logout failed');
+        }
+
+        const { deleted } = await res.json();
+        if (deleted) {
+            router.refresh();
+            router.push('/connect');
+        }
     } catch (error) {
-      console.error("Logout failed:", error);
+        console.error('Logout error:', error);
+        // You might want to show an error message to the user here
     }
-  };
+}
+
+
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-8">
@@ -81,7 +89,7 @@ const Settings = () => {
               <Button 
                 variant="destructive" 
                 className="w-full flex items-center gap-2 text-sm sm:text-base"
-                onClick={handleLogout}
+                onClick={logOut}
               >
                 <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
                 Logout

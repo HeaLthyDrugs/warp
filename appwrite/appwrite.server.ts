@@ -52,4 +52,36 @@ export async function getCurrentUser() {
         console.log('getCurrentUser error', error);
         return null;
     }
+}
+
+export async function deleteServerSession(userAgent: string | null) {
+    try {
+        const client = new Client()
+            .setEndpoint(config.appwriteUrl)
+            .setProject(config.appwriteProjectId);
+
+        if (userAgent) client.setForwardedUserAgent(userAgent);
+
+        const session = (await cookies()).get(SESSION_KEY);
+        if (!session || !session.value) {
+            throw new Error("No session");
+        }
+
+        client.setSession(session.value);
+        const account = new Account(client);
+        
+        await account.deleteSession('current');
+        await deleteSession(); // This deletes the cookie
+
+        return {
+            success: true,
+            error: null
+        };
+    } catch (error: any) {
+        console.error('deleteServerSession error:', error);
+        return {
+            success: false,
+            error: error.message
+        }
+    }
 } 

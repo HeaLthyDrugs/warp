@@ -14,15 +14,14 @@ export async function deleteCurrentSession(userAgent: string | null) {
         const account = new Account(client);
         await account.deleteSession('current');
         
-        // Clear the cookie on client side
-        document.cookie = `${SESSION_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
-        
         return {
-            success: true
+            success: true,
+            error: null
         };
     } catch (error: any) {
-        console.log('deleteSession error', error);
+        console.error('deleteSession error:', error);
         return {
+            success: false,
             error: error.message
         }
     }
