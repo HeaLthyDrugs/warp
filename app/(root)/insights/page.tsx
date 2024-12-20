@@ -52,7 +52,7 @@ const InsightsPage = () => {
       </div>
 
       {/* Search and Filter Section - Updated for better mobile layout */}
-      <Card className="mb-6 md:mb-8 rounded-xl shadow-lg">
+      {/* <Card className="mb-6 md:mb-8 rounded-xl shadow-lg">
         <CardContent className="p-4 md:p-6">
           <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:gap-4">
             <div className="flex-1">
@@ -64,21 +64,9 @@ const InsightsPage = () => {
                 />
               </div>
             </div>
-            <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:gap-4">
-              <Select className="w-full sm:w-auto">
-                <option value="">All Languages</option>
-                <option value="typescript">TypeScript</option>
-                <option value="javascript">JavaScript</option>
-              </Select>
-              <Select className="w-full sm:w-auto">
-                <option value="">Sort by</option>
-                <option value="stars">Stars</option>
-                <option value="activity">Recent Activity</option>
-              </Select>
-            </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Activity Overview Cards - Updated grid layout */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">

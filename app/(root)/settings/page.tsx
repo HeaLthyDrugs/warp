@@ -5,36 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { LogOut, User, Mail, Github } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Header from "@/components/Header";
 import { deleteCurrentSession } from "@/appwrite/appwrite.client";
+import { toast } from "sonner";
 
 const Settings = () => {
   const { user } = useAuth();
   const router = useRouter();
 
-  async function logOut() {
+  const logOut = async () => {
     try {
-        const res = await fetch(`/logout`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        });
-
-        if (!res.ok) {
-            throw new Error('Logout failed');
-        }
-
-        const { deleted } = await res.json();
-        if (deleted) {
-            router.refresh();
-            router.push('/connect');
-        }
+        await deleteCurrentSession('current');
+        router.refresh();
+        router.push('/connect');
     } catch (error) {
         console.error('Logout error:', error);
-        // You might want to show an error message to the user here
+        toast.error('Failed to logout');
     }
-}
+};
 
 
 
