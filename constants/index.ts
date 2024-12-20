@@ -7,7 +7,7 @@ export const sidebarLinks = [
     {
         imgURL: "/icons/performance.svg",
         route: "/performance",
-        label: "Performance Insights",
+        label: "Performance",
     },
     {
         imgURL: "/icons/eye.svg",
@@ -17,6 +17,6 @@ export const sidebarLinks = [
     {
         imgURL: "/icons/settings.svg",
         route: "/settings",
-        label: "Settings",
+        label: "Profile",
     },
 ];

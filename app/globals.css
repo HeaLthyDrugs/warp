@@ -223,7 +223,7 @@
   }
 
   .header-box-title {
-    @apply text-24 lg:text-30 font-semibold text-gray-900;
+    @apply text-24 lg:text-30 font-semibold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text;
   }
 
   .header-box-subtext {

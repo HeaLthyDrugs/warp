@@ -44,7 +44,7 @@ const Home = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen bg-[#f8f9fc] p-8">
             <div className='mb-8'>
                 <Header 
                   type="greeting" 
@@ -58,8 +58,8 @@ const Home = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card>
                     <CardContent className="flex items-center p-6">
-                        <div className="bg-primary/10 p-3 rounded-full mr-4">
-                            <Code2 className="w-6 h-6 text-primary" />
+                        <div className="bg-[#e8f3ff] p-3 rounded-full mr-4">
+                            <Code2 className="w-6 h-6 text-[#7ba6de]" />
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">Coding Time</p>
@@ -74,8 +74,8 @@ const Home = () => {
 
                 <Card>
                     <CardContent className="flex items-center p-6">
-                        <div className="bg-green-500/10 p-3 rounded-full mr-4">
-                            <GitBranch className="w-6 h-6 text-green-500" />
+                        <div className="bg-[#e8f7f0] p-3 rounded-full mr-4">
+                            <GitBranch className="w-6 h-6 text-[#93c9af]" />
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">Commits Today</p>
@@ -90,8 +90,8 @@ const Home = () => {
 
                 <Card>
                     <CardContent className="flex items-center p-6">
-                        <div className="bg-blue-500/10 p-3 rounded-full mr-4">
-                            <Target className="w-6 h-6 text-blue-500" />
+                        <div className="bg-[#fff2e8] p-3 rounded-full mr-4">
+                            <Target className="w-6 h-6 text-[#f3a683]" />
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">Tasks Completed</p>
@@ -106,8 +106,8 @@ const Home = () => {
 
                 <Card>
                     <CardContent className="flex items-center p-6">
-                        <div className="bg-orange-500/10 p-3 rounded-full mr-4">
-                            <Coffee className="w-6 h-6 text-orange-500" />
+                        <div className="bg-[#ffeef8] p-3 rounded-full mr-4">
+                            <Coffee className="w-6 h-6 text-[#e8a0c9]" />
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">Break Time</p>
@@ -145,9 +145,9 @@ const Home = () => {
                                 />
                                 <Bar
                                     dataKey="hours"
-                                    fill="currentColor"
+                                    fill="#93c9af"
                                     radius={[4, 4, 0, 0]}
-                                    className="fill-primary"
+                                    className="fill-[#93c9af]"
                                 />
                                 <Tooltip />
                             </BarChart>
@@ -178,9 +178,9 @@ const Home = () => {
                                 <Line
                                     type="monotone"
                                     dataKey="commits"
-                                    stroke="#16a34a"
+                                    stroke="#7ba6de"
                                     strokeWidth={2}
-                                    dot={{ fill: "#16a34a" }}
+                                    dot={{ fill: "#7ba6de" }}
                                 />
                                 <Tooltip />
                             </LineChart>
@@ -194,7 +194,7 @@ const Home = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <FolderGit className="w-5 h-5" />
+                            <FolderGit className="w-5 h-5 text-[#93c9af]" />
                             Repository Overview
                         </CardTitle>
                     </CardHeader>

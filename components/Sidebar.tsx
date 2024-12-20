@@ -17,13 +17,13 @@ const Sidebar = () => {
       <nav className="flex flex-col gap-4">
         <Link href="/" className="mb-12 cursor-pointer flex items-center gap-2">
           <Image 
-            src="/icons/dollar.svg"
+            src="/icons/S.png"
             width={34}
             height={34}
-            alt="Horizon logo"
-            className="size-[24px] max-xl:size-14"
+            alt="WARP logo"
+            className="size-[40px] max-xl:size-14 rounded-full"
           />
-          <h1 className="sidebar-logo">Warp</h1>
+          <h1 className="text-26 text-[20px] font-semibold text-gray-500 max-xl:hidden mx-2">WARP</h1>
         </Link>
 
         {sidebarLinks.map((item) => {
@@ -31,7 +31,7 @@ const Sidebar = () => {
 
           return (
             <Link href={item.route} key={item.label}
-              className={cn('sidebar-link', { 'bg-bank-gradient': isActive })}
+              className={cn('sidebar-link', { 'bg-gray-200': isActive })}
             >
               <div className="relative size-6">
                 <Image 
@@ -39,11 +39,11 @@ const Sidebar = () => {
                   alt={item.label}
                   fill
                   className={cn({
-                    'brightness-[3] invert-0': isActive
+                    'brightness-[2] invert-0': isActive
                   })}
                 />
               </div>
-              <p className={cn("sidebar-label", { "!text-white": isActive })}>
+              <p className={cn("sidebar-label", { "!text-gray-500": isActive })}>
                 {item.label}
               </p>
             </Link>
@@ -51,8 +51,6 @@ const Sidebar = () => {
         })}
         
       </nav>
-
-      <Footer />
     </section>
   )
 }
