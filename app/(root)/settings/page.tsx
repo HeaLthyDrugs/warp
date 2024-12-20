@@ -40,14 +40,6 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-8">
-      <div className="mb-4 sm:mb-8">
-        <Header 
-          type="greeting"
-          title="Account Settings" 
-          subtext="Manage your account preferences"
-        />
-      </div>
-
       <div className="w-full max-w-2xl mx-auto px-2 sm:px-0">
         <Card>
           <CardHeader>

@@ -371,11 +371,11 @@
 
   /* Sidebar */
   .sidebar {
-    @apply sticky left-0 top-0 flex h-screen w-fit flex-col  justify-between border-r border-gray-200 bg-white pt-8 text-white max-md:hidden sm:p-4 xl:p-6 2xl:w-[355px];
+    @apply sticky left-0 top-0 flex h-screen w-fit flex-col shadow-creditCard  justify-between border-r bg-slate-100 pt-8 text-white max-md:hidden sm:p-4 xl:p-6 2xl:w-[355px];
   }
 
   .sidebar-logo {
-    @apply 2xl:text-26 font-ibm-plex-serif text-[26px] font-bold text-black-1 max-xl:hidden;
+    @apply 2xl:text-22 font-ibm-plex-serif text-[26px] font-bold text-black-1 max-xl:hidden;
   }
 
   .sidebar-link {
@@ -383,6 +383,6 @@
   }
 
   .sidebar-label {
-    @apply text-16 font-semibold text-black-2 max-xl:hidden;
+    @apply text-14 font-semibold text-gray-400 max-xl:hidden;
   }
 }

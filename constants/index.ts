@@ -6,13 +6,28 @@ export const sidebarLinks = [
     },
     {
         imgURL: "/icons/performance.svg",
-        route: "/performance",
-        label: "Performance",
+        route: "/insights",
+        label: "Insights",
+    },
+    {
+        imgURL: "/icons/performance.svg",
+        route: "/task",
+        label: "Tasks",
     },
     {
         imgURL: "/icons/eye.svg",
-        route: "/error-tracking",
-        label: "Error Tracking",
+        route: "/snippets",
+        label: "Snippets",
+    },
+    {
+        imgURL: "/icons/settings.svg",
+        route: "/ai",
+        label: "WARP ai",
+    },
+    {
+        imgURL: "/icons/eye.svg",
+        route: "/integrations",
+        label: "Integrations",
     },
     {
         imgURL: "/icons/settings.svg",

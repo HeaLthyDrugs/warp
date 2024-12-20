@@ -34,7 +34,7 @@ const MobileNav = () => {
         <SheetContent side="left" className="border-none bg-white">
           <Link href="/" className="cursor-pointer flex items-center gap-3 px-4">
             <Image 
-              src="/icons/target.png"
+              src="/icons/S.png"
               width={34}
               height={34}
               alt="Horizon logo"

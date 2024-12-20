@@ -6,13 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
   Code2, 
   GitBranch, 
-  Clock, 
-  Target, 
-  ArrowUp, 
+  Users, 
+  Star,
+  Plus,
+  Brain,
+  Activity,
+  FolderGit,
+  ArrowUp,
+  Target,
   ArrowDown,
-  Calendar,
-  Coffee,
-  FolderGit
+  Coffee
 } from 'lucide-react'
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Line, LineChart, Tooltip } from 'recharts'
 import { useAuth } from '@/context/AuthContext';
@@ -43,8 +46,19 @@ const Home = () => {
       { name: 'Sun', commits: 10 },
     ];
 
+    // Updated sample data for GitHub activity
+    const activityData = [
+      { name: 'Mon', contributions: 15, stars: 5 },
+      { name: 'Tue', contributions: 22, stars: 8 },
+      { name: 'Wed', contributions: 18, stars: 12 },
+      { name: 'Thu', contributions: 25, stars: 7 },
+      { name: 'Fri', contributions: 30, stars: 15 },
+      { name: 'Sat', contributions: 12, stars: 3 },
+      { name: 'Sun', contributions: 8, stars: 4 },
+    ];
+
     return (
-        <div className="min-h-screen bg-[#f8f9fc] p-8">
+        <div className="min-h-screen bg-[#faf8f6] p-8">
             <div className='mb-8'>
                 <Header 
                   type="greeting" 
@@ -56,6 +70,21 @@ const Home = () => {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <Card className="rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <CardContent className="flex items-center p-6">
+                        <div className="bg-[#f0e6ff] p-3 rounded-full mr-4">
+                            <FolderGit className="w-6 h-6 text-[#9f7aea]" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-muted-foreground">Repositories</p>
+                            <h3 className="text-2xl font-bold">{repositories?.length || 0}</h3>
+                            <p className="text-xs text-[#9f7aea] mt-1">
+                                View All
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 <Card>
                     <CardContent className="flex items-center p-6">
                         <div className="bg-[#e8f3ff] p-3 rounded-full mr-4">
@@ -120,102 +149,108 @@ const Home = () => {
                 </Card>
             </div>
 
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Weekly Productivity</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={350}>
-                            <BarChart data={productivityData}>
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <YAxis
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(value) => `${value}h`}
-                                />
-                                <Bar
-                                    dataKey="hours"
-                                    fill="#93c9af"
-                                    radius={[4, 4, 0, 0]}
-                                    className="fill-[#93c9af]"
-                                />
-                                <Tooltip />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Commit Activity</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={350}>
-                            <LineChart data={commitData}>
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <YAxis
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <Line
-                                    type="monotone"
-                                    dataKey="commits"
-                                    stroke="#7ba6de"
-                                    strokeWidth={2}
-                                    dot={{ fill: "#7ba6de" }}
-                                />
-                                <Tooltip />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
+            {/* Quick Actions */}
+            <div className="mb-8">
+                <div className="flex gap-4 flex-wrap">
+                    <button className="flex items-center gap-2 bg-[#e6f0ff] text-[#4a90e2] px-4 py-2 rounded-full hover:bg-[#d1e3ff] transition-colors">
+                        <Plus className="w-4 h-4" /> New Repository
+                    </button>
+                    <button className="flex items-center gap-2 bg-[#fff0e6] text-[#f6ad55] px-4 py-2 rounded-full hover:bg-[#ffe4cc] transition-colors">
+                        <Brain className="w-4 h-4" /> AI Suggestions
+                    </button>
+                    {/* Add more quick action buttons */}
+                </div>
             </div>
 
-            {/* Repository Stats - Replacing Recent Activity & Upcoming Tasks */}
-            <div className="grid grid-cols-1 gap-6">
-                <Card>
+            {/* GitHub Activity Chart - Updated design */}
+            <Card className="mb-8 rounded-xl shadow-lg">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-[#9f7aea]" />
+                        GitHub Activity
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={350}>
+                        <LineChart data={activityData}>
+                            <XAxis
+                                dataKey="name"
+                                stroke="#888888"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <YAxis
+                                stroke="#888888"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <Line
+                                type="monotone"
+                                dataKey="contributions"
+                                stroke="#9f7aea"
+                                strokeWidth={2}
+                                dot={{ fill: "#9f7aea" }}
+                            />
+                            <Line
+                                type="monotone"
+                                dataKey="stars"
+                                stroke="#f6ad55"
+                                strokeWidth={2}
+                                dot={{ fill: "#f6ad55" }}
+                            />
+                            <Tooltip />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            {/* Recent Projects */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="rounded-xl shadow-lg">
+                    <CardHeader>
+                        <CardTitle>Recent Projects</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {/* Add recent projects list */}
+                        <div className="space-y-4">
+                            {repositories?.slice(0, 4).map((repo: any) => (
+                                <div key={repo.id} className="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-[#faf8f6] transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <FolderGit className="w-5 h-5 text-[#9f7aea]" />
+                                        <div>
+                                            <p className="font-medium">{repo.name}</p>
+                                            <p className="text-sm text-muted-foreground">{repo.description}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-muted-foreground">{repo.language}</span>
+                                        <Star className="w-4 h-4 text-[#f6ad55]" />
+                                        <span className="text-sm">{repo.stargazers_count}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* AI Suggestions Card */}
+                <Card className="rounded-xl shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <FolderGit className="w-5 h-5 text-[#93c9af]" />
-                            Repository Overview
+                            <Brain className="w-5 h-5 text-[#9f7aea]" />
+                            AI Suggestions
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Total Repositories</p>
-                                <h3 className="text-3xl font-bold">{repositories?.length}</h3>
+                        {/* Add AI suggestions content */}
+                        <div className="space-y-4">
+                            <div className="p-3 bg-[#f0e6ff] rounded-lg">
+                                <p className="font-medium text-[#9f7aea]">Update Documentation</p>
+                                <p className="text-sm text-muted-foreground">Your project 'awesome-project' hasn't had its README updated in 30 days.</p>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Active This Month</p>
-                                <h3 className="text-3xl font-bold">8</h3>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Public</p>
-                                <h3 className="text-3xl font-bold">16</h3>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Private</p>
-                                <h3 className="text-3xl font-bold">8</h3>
-                            </div>
+                            {/* Add more suggestions */}
                         </div>
                     </CardContent>
                 </Card>
