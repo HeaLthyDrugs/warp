@@ -3,6 +3,7 @@
 import { Models } from "node-appwrite";
 import { createContext, useContext } from "react";
 import { getCurrentUser } from "@/appwrite/appwrite.server";
+import { GitHubProvider } from "./GitHubContext";
 
 const defaultState: AuthContextType = {
   isAuth: false,
@@ -16,7 +17,9 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children, initialState }: AuthProviderProps) => {
   return (
     <AuthContext.Provider value={initialState}>
-      {children}
+      <GitHubProvider>
+        {children}
+      </GitHubProvider>
     </AuthContext.Provider>
   );
 };

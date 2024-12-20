@@ -13,6 +13,7 @@ export async function signUpWithGithub() {
 		OAuthProvider.Github,
 		`${origin}/sucess`,
 		`${origin}/connect`,
+		['repo', 'user'] // Required GitHub scopes
 	);
 
 	return redirect(redirectUrl);

@@ -11,14 +11,16 @@ import {
   ArrowUp, 
   ArrowDown,
   Calendar,
-  CheckCircle2,
-  AlertCircle,
-  Coffee
+  Coffee,
+  FolderGit
 } from 'lucide-react'
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Line, LineChart, Tooltip } from 'recharts'
+import { useAuth } from '@/context/AuthContext';
+import { useGitHub } from '@/context/GitHubContext';
 
 const Home = () => {
-    const LoggedIn = { firstName: 'Manish' };
+    const { user } = useAuth();
+    const { profile, repositories, contributions, isLoading, error } = useGitHub();
 
     // Sample data for charts
     const productivityData = [
@@ -47,7 +49,7 @@ const Home = () => {
                 <Header 
                   type="greeting" 
                   title="Good Morning" 
-                  user={LoggedIn?.firstName} 
+                  user={user?.name} 
                   subtext="Manage and Be productive" 
                 />
             </div>
@@ -187,68 +189,38 @@ const Home = () => {
                 </Card>
             </div>
 
-            {/* Recent Activity & Upcoming Tasks */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Repository Stats - Replacing Recent Activity & Upcoming Tasks */}
+            <div className="grid grid-cols-1 gap-6">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Clock className="w-5 h-5" />
-                            Recent Activity
+                            <FolderGit className="w-5 h-5" />
+                            Repository Overview
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            {[
-                                { text: "Pushed 5 commits to main", time: "2 hours ago", icon: GitBranch },
-                                { text: "Completed Task: Update Dashboard UI", time: "4 hours ago", icon: CheckCircle2 },
-                                { text: "Code Review: Authentication Flow", time: "5 hours ago", icon: Code2 },
-                                { text: "Updated Project Documentation", time: "yesterday", icon: AlertCircle },
-                            ].map((activity, index) => (
-                                <div key={index} className="flex items-center gap-4">
-                                    <activity.icon className="w-4 h-4 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">{activity.text}</p>
-                                        <p className="text-xs text-muted-foreground">{activity.time}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Calendar className="w-5 h-5" />
-                            Upcoming Tasks
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {[
-                                { text: "Team Meeting", time: "Today, 2:00 PM", priority: "High" },
-                                { text: "Code Review", time: "Today, 4:00 PM", priority: "Medium" },
-                                { text: "Deploy Updates", time: "Tomorrow, 10:00 AM", priority: "High" },
-                                { text: "Project Planning", time: "Tomorrow, 2:00 PM", priority: "Low" },
-                            ].map((task, index) => (
-                                <div key={index} className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium">{task.text}</p>
-                                        <p className="text-xs text-muted-foreground">{task.time}</p>
-                                    </div>
-                                    <span className={`text-xs px-2 py-1 rounded-full ${
-                                        task.priority === 'High' ? 'bg-red-100 text-red-800' :
-                                        task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-green-100 text-green-800'
-                                    }`}>
-                                        {task.priority}
-                                    </span>
-                                </div>
-                            ))}
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">Total Repositories</p>
+                                <h3 className="text-3xl font-bold">{repositories?.length}</h3>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">Active This Month</p>
+                                <h3 className="text-3xl font-bold">8</h3>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">Public</p>
+                                <h3 className="text-3xl font-bold">16</h3>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">Private</p>
+                                <h3 className="text-3xl font-bold">8</h3>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
             </div>
+
         </div>
     )
 }
