@@ -13,6 +13,5 @@ export function middleware(request: NextRequest) {
 export const config = {
     matcher: [
         '/',
-        // Add other protected routes, but not /logout
     ],
 }

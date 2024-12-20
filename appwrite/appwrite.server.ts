@@ -5,28 +5,24 @@ import { cookies } from "next/headers";
 import { Client, Account } from "node-appwrite";
 
 export async function createSessionClient(userAgent: string | null) {
-    try {
-        const client = new Client()
-            .setEndpoint(config.appwriteUrl)
-            .setProject(config.appwriteProjectId);
+    const client = new Client()
+        .setEndpoint(config.appwriteUrl)
+        .setProject(config.appwriteProjectId);
 
-        const session = (await cookies()).get(SESSION_KEY);
-        if (!session?.value) {
-            throw new Error("No session cookie found");
-        }
-
-        if (userAgent) client.setForwardedUserAgent(userAgent);
-        client.setSession(session.value);
-
-        return {
-            get account() {
-                return new Account(client);
-            },
-        };
-    } catch (error) {
-        console.error('Session client creation error:', error);
-        throw error;
+    const session = (await cookies()).get(SESSION_KEY);
+    if (!session || !session.value) {
+        throw new Error("No session");
     }
+
+    if (userAgent) client.setForwardedUserAgent(userAgent);
+
+    client.setSession(session.value);
+
+    return {
+        get account() {
+            return new Account(client);
+        },
+    };
 }
 
 export async function createAdminClient(userAgent: string | null) {

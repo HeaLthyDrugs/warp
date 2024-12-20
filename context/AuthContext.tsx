@@ -16,6 +16,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children, initialState }: AuthProviderProps) => {
   return (
+
     <AuthContext.Provider value={initialState}>
       <GitHubProvider>
         {children}
