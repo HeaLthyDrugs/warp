@@ -32,14 +32,23 @@ export function GitHubProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getGitHubData();
-      setGithubData({
-        profile: data.profile,
-        repositories: data.repositories || [],
-        contributions: data.contributions,
-        isLoading: false,
-        error: data.error
-      });
+      try {
+        const data = await getGitHubData();
+        setGithubData({
+          profile: data.profile,
+          repositories: data.repositories || [],
+          contributions: data.contributions,
+          isLoading: false,
+          error: data.error
+        });
+      } catch (error) {
+        console.error('Error fetching GitHub data:', error);
+        setGithubData(prev => ({
+          ...prev,
+          isLoading: false,
+          error: 'Failed to fetch GitHub data'
+        }));
+      }
     };
 
     fetchData();

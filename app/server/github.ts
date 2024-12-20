@@ -1,15 +1,15 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { GitHubService } from "@/lib/github";
+import { getGitHubToken, GitHubService } from "@/lib/github";
 
 export async function getGitHubData() {
   try {
-    const cookieStore = await cookies();
-    const githubToken = cookieStore.get('github_token')?.value;
-
-    if (!githubToken) {
-      throw new Error('GitHub token not found');
+    let githubToken;
+    try {
+      githubToken = await getGitHubToken();
+    } catch (tokenError) {
+      console.error('Token retrieval error:', tokenError);
+      throw new Error('Unable to access GitHub token from session');
     }
 
     const github = new GitHubService(githubToken);
@@ -32,7 +32,7 @@ export async function getGitHubData() {
       profile: null,
       repositories: null,
       contributions: null,
-      error: 'Failed to fetch GitHub data'
+      error: error instanceof Error ? error.message : 'Failed to fetch GitHub data'
     };
   }
 } 
