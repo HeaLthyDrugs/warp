@@ -8,6 +8,7 @@ import {
     Plus,
     Tag,
     MoreVertical,
+    Trash,
     ChevronDown,
     AlertCircle
 } from 'lucide-react';
@@ -23,6 +24,9 @@ import { useAuth } from "@/context/AuthContext";
 import { databases } from '@/lib/appwrite/config';
 import { ID, Query } from 'appwrite';
 import { toast } from 'sonner';
+import { createSessionClient } from "@/appwrite/appwrite.server";
+import Router from 'next/router';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 interface Task {
     $id?: string;
@@ -34,7 +38,7 @@ interface Task {
 }
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || 'your_database_id';
-const COLLECTION_ID = 'tasks';
+const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_TASK_COLLECTION_ID || 'your_collection_id';
 
 const TasksPage = () => {
     const { user } = useAuth();
@@ -44,28 +48,35 @@ const TasksPage = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [loading, setLoading] = useState(true);
 
-    // Fetch tasks
-    useEffect(() => {
-        if (!user?.$id) return;
-        fetchTasks();
-    }, [user]);
+        // Add permission check
+        useEffect(() => {
+            if (!user) {
+                // Redirect to login or show error
+                Router.push('/connect');
+                return;
+            }
+        }, [user]);
 
+    // Fetch tasks
     const fetchTasks = async () => {
-        if (!user) return;
         try {
-            const response = await databases.listDocuments(
-                DATABASE_ID,
-                COLLECTION_ID,
-                [Query.equal('user_id', user.$id)]
-            );
-            setTasks(response.documents as unknown as Task[]);
+            const response = await fetch('/api/tasks');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setTasks(data.documents || []);
+            setLoading(false);
         } catch (error) {
-            console.error('Fetch error:', error);
+            console.error('Fetch tasks error:', error);
             toast.error('Failed to fetch tasks');
-        } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchTasks();
+    }, []);
 
     const addTask = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -133,6 +144,14 @@ const TasksPage = () => {
         statusFilter === 'all' ? true : task.status === statusFilter
     );
 
+    // Helper function to get task counts
+    const getTaskCounts = () => ({
+        todo: tasks.filter(t => t.status === 'todo').length,
+        inProgress: tasks.filter(t => t.status === 'in_progress').length,
+        completed: tasks.filter(t => t.status === 'completed').length,
+        total: tasks.length
+    });
+
     return (
         <div className="min-h-screen bg-white p-4 sm:p-6 md:p-8">
             {/* Header with responsive spacing */}
@@ -140,9 +159,9 @@ const TasksPage = () => {
                 <h2 className="text-26 font-semibold text-gray-500">Manage your tasks</h2>
             </div>
 
-            {/* Stats Grid - Responsive columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 sm:mb-6">
-                {/* Stats cards with responsive padding and text */}
+            {/* Updated Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 sm:mb-6">
+                {/* Todo Card */}
                 <Card className="rounded-xl shadow-lg">
                     <CardContent className="flex items-center p-3 sm:p-4 md:p-6">
                         <div className="bg-[#fff0e6] p-2 sm:p-3 rounded-full mr-3">
@@ -150,11 +169,49 @@ const TasksPage = () => {
                         </div>
                         <div>
                             <p className="text-xs sm:text-sm font-medium text-muted-foreground">To Do</p>
-                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{tasks.filter(t => t.status === 'todo').length}</h3>
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{getTaskCounts().todo}</h3>
                         </div>
                     </CardContent>
                 </Card>
-                {/* ... other stat cards with same responsive classes ... */}
+
+                {/* In Progress Card */}
+                <Card className="rounded-xl shadow-lg">
+                    <CardContent className="flex items-center p-3 sm:p-4 md:p-6">
+                        <div className="bg-[#e6f3ff] p-2 sm:p-3 rounded-full mr-3">
+                            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-[#3b82f6]" />
+                        </div>
+                        <div>
+                            <p className="text-xs sm:text-sm font-medium text-muted-foreground">In Progress</p>
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{getTaskCounts().inProgress}</h3>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Completed Card */}
+                <Card className="rounded-xl shadow-lg">
+                    <CardContent className="flex items-center p-3 sm:p-4 md:p-6">
+                        <div className="bg-[#e6ffe6] p-2 sm:p-3 rounded-full mr-3">
+                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#22c55e]" />
+                        </div>
+                        <div>
+                            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Completed</p>
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{getTaskCounts().completed}</h3>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Total Tasks Card */}
+                <Card className="rounded-xl shadow-lg">
+                    <CardContent className="flex items-center p-3 sm:p-4 md:p-6">
+                        <div className="bg-[#f3e6ff] p-2 sm:p-3 rounded-full mr-3">
+                            <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-[#9f7aea]" />
+                        </div>
+                        <div>
+                            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Tasks</p>
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{getTaskCounts().total}</h3>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Add Task Form - Stack on mobile */}
@@ -211,7 +268,7 @@ const TasksPage = () => {
                             {filteredTasks.map((task) => (
                                 <div key={task.$id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-white rounded-lg gap-3">
                                     <div className="flex items-center gap-3">
-                                        <button className="focus:outline-none">
+                                        <button className="focus:outline-none" onClick={() => updateTaskStatus(task.$id!, task.status === 'completed' ? 'todo' : 'completed')}>
                                             {task.status === 'completed' ? (
                                                 <CheckCircle2 className="w-5 h-5 text-[#9f7aea]" />
                                             ) : (
@@ -254,7 +311,7 @@ const TasksPage = () => {
                                             className="shrink-0"
                                             onClick={() => deleteTask(task.$id!)}
                                         >
-                                            <MoreVertical className="w-4 h-4" />
+                                            <Trash className="w-4 h-4 text-red-500" />
                                         </Button>
                                     </div>
                                 </div>
@@ -277,4 +334,10 @@ const getPriorityColor = (priority: string) => {
     }
 };
 
-export default TasksPage;
+export default function TaskPageWrapper() {
+    return (
+        <ErrorBoundary>
+            <TasksPage />
+        </ErrorBoundary>
+    );
+}

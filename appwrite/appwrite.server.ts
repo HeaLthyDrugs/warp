@@ -1,3 +1,5 @@
+"use server";
+
 import { config } from "./config";
 import { SESSION_KEY } from "@/consts"; 
 import { deleteSession } from "@/lib/session";

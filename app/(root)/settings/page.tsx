@@ -14,12 +14,20 @@ const Settings = () => {
 
   const logOut = async () => {
     try {
-        await deleteCurrentSession('current');
+        const response = await fetch('/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) throw new Error('Logout failed');
+
         router.refresh();
         router.push('/connect');
     } catch (error) {
         console.error('Logout error:', error);
-        toast.error('Failed to logout');
+        toast.error("Logout failed. Please try again.");
     }
 };
 
