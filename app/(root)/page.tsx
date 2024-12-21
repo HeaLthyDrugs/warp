@@ -58,7 +58,7 @@ const Home = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#faf8f6] p-8">
+        <div className="min-h-screen bg-white p-8">
             <div className='mb-8'>
                 <Header 
                   type="greeting" 

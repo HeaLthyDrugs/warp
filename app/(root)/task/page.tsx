@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { createSessionClient } from "@/appwrite/appwrite.server";
 import Router from 'next/router';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import Spinner from '@/components/ui/spinner';
 
 interface Task {
     $id?: string;
@@ -262,7 +263,9 @@ const TasksPage = () => {
                 </CardHeader>
                 <CardContent className="p-4">
                     {loading ? (
-                        <div className="text-center">Loading tasks...</div>
+                        <div className="text-center">
+                            <Spinner />
+                        </div>
                     ) : (
                         <div className="space-y-3">
                             {filteredTasks.map((task) => (
