@@ -14,7 +14,7 @@ const Settings = () => {
 
   const logOut = async () => {
     try {
-        const response = await fetch('/auth/logout', {
+        const response = await fetch('/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
