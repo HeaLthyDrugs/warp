@@ -49,7 +49,17 @@ export async function getCurrentUser() {
             return null;
         }
         const { account } = await createSessionClient('');
-        return await account.get();
+        
+        // Get current session with provider details
+        const currentSession = await account.getSession('current');
+        const user = await account.get();
+
+        return {
+            ...user,
+            provider: currentSession.provider,
+            providerUid: currentSession.providerUid,
+            providerAccessToken: currentSession.providerAccessToken
+        };
     } catch (error: any) {
         console.log('getCurrentUser error', error);
         return null;

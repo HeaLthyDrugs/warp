@@ -1,29 +1,25 @@
 "use server";
 
-import { getGitHubToken, GitHubService } from "@/lib/github";
+import { GitHubService } from "@/lib/github";
 
 export async function getGitHubData() {
   try {
-    let githubToken;
-    try {
-      githubToken = await getGitHubToken();
-    } catch (tokenError) {
-      console.error('Token retrieval error:', tokenError);
-      throw new Error('Unable to access GitHub token from session');
-    }
-
-    const github = new GitHubService(githubToken);
+    const github = new GitHubService();
     
-    const [profile, repositories, contributions] = await Promise.all([
+    const [profile, repositories, commitActivity, languageStats, totalStars] = await Promise.all([
       github.getUserProfile(),
       github.getUserRepositories(),
-      github.getUserContributions()
+      github.getCommitActivity(),
+      github.getLanguageStats(),
+      github.getTotalStars()
     ]);
 
     return {
       profile,
       repositories,
-      contributions,
+      commitActivity,
+      languageStats,
+      totalStars,
       error: null
     };
   } catch (error) {
@@ -31,7 +27,9 @@ export async function getGitHubData() {
     return {
       profile: null,
       repositories: null,
-      contributions: null,
+      commitActivity: null,
+      languageStats: null,
+      totalStars: 0,
       error: error instanceof Error ? error.message : 'Failed to fetch GitHub data'
     };
   }

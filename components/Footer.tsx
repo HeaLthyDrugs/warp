@@ -16,7 +16,7 @@ const Footer = () => {
 
   return (
     <footer className="footer">
-      <h1>Hello</h1>
+      <h1 className="text-gray-300 text-14">Made with ❤️ by HeaLthyDrugs</h1>
     </footer>
   )
 }

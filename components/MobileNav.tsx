@@ -37,9 +37,10 @@ const MobileNav = () => {
               src="/icons/S.png"
               width={34}
               height={34}
-              alt="Horizon logo"
+              alt="Warp logo"
+              className="cursor-pointer rounded-full"
             />
-            <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1">Warp</h1>
+            <h1 className="text-20 font-bold text-gray-500">WARP</h1>
           </Link>
           <div className="mobilenav-sheet">
             <SheetClose asChild>
@@ -50,7 +51,7 @@ const MobileNav = () => {
                 return (
                   <SheetClose asChild key={item.route}>
                     <Link href={item.route} key={item.label}
-                      className={cn('mobilenav-sheet_close w-full', { 'bg-bank-gradient': isActive })}
+                      className={cn('mobilenav-sheet_close w-full', { 'bg-gray-200': isActive })}
                     >
                         <Image 
                           src={item.imgURL}
@@ -61,7 +62,7 @@ const MobileNav = () => {
                             'brightness-[3] invert-0': isActive
                           })}
                         />
-                      <p className={cn("text-16 font-semibold text-black-2", { "text-white": isActive })}>
+                      <p className={cn("text-16 font-semibold text-gray-300", { "text-gray-500": isActive })}>
                         {item.label}
                       </p>
                     </Link>

@@ -33,9 +33,7 @@ export function AddSnippetModal({ isOpen, onClose, onSubmit }: AddSnippetModalPr
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] bg-white">
-        <DialogHeader>
-          <DialogTitle>Add New Snippet</DialogTitle>
-        </DialogHeader>
+      <DialogTitle>Add New Snippet</DialogTitle>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Input

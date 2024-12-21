@@ -41,7 +41,7 @@ export default async function RootLayout({
         <Sidebar />
         <div className="flex size-full flex-col">
           <div className="root-layout">
-            <Image src="/icons/target.png" width={30} height={30} alt="logo" />
+            <Image src="/icons/S.png" width={30} height={30} alt="logo" className="cursor-pointer rounded-full"/>
             <div>
               <MobileNav />
             </div>

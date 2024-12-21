@@ -1,51 +1,70 @@
 import { Octokit } from "@octokit/rest";
-import { createSessionClient } from "@/appwrite/appwrite.server";
-
-export async function getGitHubToken() {
-  try {
-    const { account } = await createSessionClient('');
-    // Get the current session which contains the OAuth2 data
-    const currentSession = await account.getSession('current');
-
-    if (!currentSession?.providerAccessToken) {
-      throw new Error('No GitHub access token in current session');
-    }
-
-    return currentSession.providerAccessToken;
-  } catch (error) {
-    console.error('Failed to get GitHub token:', error);
-    throw error;
-  }
-}
 
 export class GitHubService {
   private octokit: Octokit;
 
-  constructor(accessToken: string) {
+  constructor() {
     this.octokit = new Octokit({
-      auth: accessToken,
+      auth: process.env.GITHUB_ACCESS_TOKEN
     });
   }
 
   async getUserProfile() {
-    const { data } = await this.octokit.users.getAuthenticated();
+    const { data } = await this.octokit.users.getByUsername({
+      username: process.env.GITHUB_USERNAME || ''
+    });
     return data;
   }
 
   async getUserRepositories() {
-    const { data } = await this.octokit.repos.listForAuthenticatedUser({
+    const { data } = await this.octokit.repos.listForUser({
+      username: process.env.GITHUB_USERNAME || '',
       sort: 'updated',
-      per_page: 5
+      per_page: 10
     });
     return data;
   }
 
-  async getUserContributions() {
-    const { data } = await this.octokit.rest.search.commits({
-      q: `author:${await this.getUserProfile().then(profile => profile.login)}`,
+  async getCommitActivity() {
+    const username = process.env.GITHUB_USERNAME || '';
+    const { data } = await this.octokit.search.commits({
+      q: `author:${username}`,
       sort: 'author-date',
       per_page: 100
     });
-    return data;
+
+    // Process commits by day
+    const last7Days = new Array(7).fill(0);
+    const today = new Date();
+    
+    data.items.forEach((commit: any) => {
+      const commitDate = new Date(commit.commit.author.date);
+      const dayDiff = Math.floor((today.getTime() - commitDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (dayDiff < 7) {
+        last7Days[dayDiff]++;
+      }
+    });
+
+    return last7Days.reverse();
+  }
+
+  async getLanguageStats() {
+    const repos = await this.getUserRepositories();
+    const languageStats: { [key: string]: number } = {};
+
+    await Promise.all(
+      repos.map(async (repo) => {
+        if (repo.language) {
+          languageStats[repo.language] = (languageStats[repo.language] || 0) + 1;
+        }
+      })
+    );
+
+    return languageStats;
+  }
+
+  async getTotalStars() {
+    const repos = await this.getUserRepositories();
+    return repos.reduce((total, repo) => total + (repo.stargazers_count ?? 0), 0);
   }
 } 

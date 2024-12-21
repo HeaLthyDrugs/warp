@@ -6,11 +6,6 @@ export const sidebarLinks = [
     },
     {
         imgURL: "/icons/performance.svg",
-        route: "/insights",
-        label: "Insights",
-    },
-    {
-        imgURL: "/icons/performance.svg",
         route: "/task",
         label: "Tasks",
     },

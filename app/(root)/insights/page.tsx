@@ -1,46 +1,95 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useGitHub } from '@/context/GitHubContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { 
-  Zap, 
-  Timer, 
-  GitCommit, 
-  Code2, 
-  ArrowUp, 
-  ArrowDown,
-  Brain,
-  Coffee,
-  Focus,
-  GitBranch, 
-  GitPullRequest, 
   GitMerge,
-  Search,
-  Filter,
   Star,
   GitFork,
-  Users,
-  Clock,
-  Activity
+  Activity,
+  Code2
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const InsightsPage = () => {
-  // Sample data for repository metrics
-  const repoActivityData = [
-    { date: 'Mon', commits: 15, prs: 5, issues: 8 },
-    { date: 'Tue', commits: 22, prs: 3, issues: 5 },
-    // ... more data
-  ];
+  const [activeChart, setActiveChart] = useState<'bar' | 'line'>('bar');
+  const { githubData: { 
+    profile, 
+    repositories, 
+    commitActivity, 
+    languageStats,
+    totalStars,
+    loading, 
+    error 
+  } } = useGitHub();
 
-  const topRepositories = [
-    { name: 'project-alpha', stars: 120, forks: 45, language: 'TypeScript', updated: '2h ago' },
-    { name: 'awesome-utils', stars: 89, forks: 23, language: 'JavaScript', updated: '1d ago' },
-    // ... more repos
-  ];
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  // Convert commit activity to chart data
+  const commitData = commitActivity?.map((commits: number, index: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - index));
+    return {
+      name: date.toLocaleDateString('en-US', { weekday: 'short' }),
+      commits
+    };
+  }) || [];
+
+  // Convert language stats to pie chart data
+  const languageData = Object.entries(languageStats || {}).map(([name, value]) => ({
+    name,
+    value
+  }));
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
+  const renderChart = () => {
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeChart}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
+        >
+          <ResponsiveContainer width="100%" height={350}>
+            {activeChart === 'bar' ? (
+              <BarChart data={commitData}>
+                <XAxis dataKey="name" stroke="#888888" />
+                <YAxis stroke="#888888" />
+                <Tooltip />
+                <Bar dataKey="commits" fill="#4a90e2" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            ) : (
+              <LineChart data={commitData}>
+                <XAxis dataKey="name" stroke="#888888" />
+                <YAxis stroke="#888888" />
+                <Tooltip />
+                <Line 
+                  type="monotone" 
+                  dataKey="commits" 
+                  stroke="#4a90e2" 
+                  strokeWidth={2}
+                  dot={{ fill: "#4a90e2" }}
+                />
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        </motion.div>
+      </AnimatePresence>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#faf8f6] p-4 sm:p-6 md:p-8">
@@ -51,24 +100,7 @@ const InsightsPage = () => {
         />
       </div>
 
-      {/* Search and Filter Section - Updated for better mobile layout */}
-      {/* <Card className="mb-6 md:mb-8 rounded-xl shadow-lg">
-        <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search repositories..." 
-                  className="pl-9 bg-white border-none w-full"
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card> */}
-
-      {/* Activity Overview Cards - Updated grid layout */}
+      {/* Activity Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
         <Card className="rounded-xl shadow-lg hover:shadow-xl transition-shadow">
           <CardContent className="flex items-center p-4 md:p-6">
@@ -77,93 +109,114 @@ const InsightsPage = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total Commits</p>
-              <h3 className="text-xl md:text-2xl font-bold">1,234</h3>
+              <h3 className="text-xl md:text-2xl font-bold">
+                {commitActivity?.reduce((a, b) => a + b, 0) || 0}
+              </h3>
               <p className="text-xs text-[#4a90e2] flex items-center mt-1">
-                +23% this month
+                Last 7 days
               </p>
             </div>
           </CardContent>
         </Card>
-        {/* ... similar cards ... */}
+
+        <Card className="rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+          <CardContent className="flex items-center p-4 md:p-6">
+            <div className="bg-[#fff0e6] p-2 md:p-3 rounded-full mr-3 md:mr-4">
+              <Star className="w-5 h-5 md:w-6 md:h-6 text-[#f6ad55]" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Total Stars</p>
+              <h3 className="text-xl md:text-2xl font-bold">{totalStars}</h3>
+              <p className="text-xs text-[#f6ad55] flex items-center mt-1">
+                Across all repos
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+          <CardContent className="flex items-center p-4 md:p-6">
+            <div className="bg-[#e6ffe6] p-2 md:p-3 rounded-full mr-3 md:mr-4">
+              <Code2 className="w-5 h-5 md:w-6 md:h-6 text-[#48bb78]" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Languages</p>
+              <h3 className="text-xl md:text-2xl font-bold">
+                {Object.keys(languageStats || {}).length}
+              </h3>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+          <CardContent className="flex items-center p-4 md:p-6">
+            <div className="bg-[#f0e6ff] p-2 md:p-3 rounded-full mr-3 md:mr-4">
+              <GitFork className="w-5 h-5 md:w-6 md:h-6 text-[#9f7aea]" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Repositories</p>
+              <h3 className="text-xl md:text-2xl font-bold">{repositories?.length || 0}</h3>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Activity Timeline - Responsive height */}
+      {/* Activity Timeline */}
       <Card className="mb-6 md:mb-8 rounded-xl shadow-lg">
         <CardHeader className="p-4 md:p-6">
-          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-            <Activity className="w-5 h-5 text-[#9f7aea]" />
-            Activity Timeline
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+              <Activity className="w-5 h-5 text-[#9f7aea]" />
+              Commit Activity
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button
+                variant={activeChart === 'bar' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveChart('bar')}
+              >
+                Bar
+              </Button>
+              <Button
+                variant={activeChart === 'line' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveChart('line')}
+              >
+                Line
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
-          <ResponsiveContainer width="100%" height={300} minHeight={300}>
-            <LineChart data={repoActivityData}>
-              <XAxis dataKey="date" stroke="#888888" />
-              <YAxis stroke="#888888" />
-              <Tooltip />
-              <Line 
-                type="monotone" 
-                dataKey="commits" 
-                stroke="#4a90e2" 
-                strokeWidth={2}
-                dot={{ fill: "#4a90e2" }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="prs" 
-                stroke="#9f7aea" 
-                strokeWidth={2}
-                dot={{ fill: "#9f7aea" }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="issues" 
-                stroke="#f6ad55" 
-                strokeWidth={2}
-                dot={{ fill: "#f6ad55" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {renderChart()}
         </CardContent>
       </Card>
 
-      {/* Repository List - Responsive layout */}
+      {/* Language Distribution */}
       <Card className="rounded-xl shadow-lg">
         <CardHeader className="p-4 md:p-6">
-          <CardTitle className="text-lg md:text-xl">Top Repositories</CardTitle>
+          <CardTitle className="text-lg md:text-xl">Language Distribution</CardTitle>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
-          <div className="space-y-4">
-            {topRepositories.map((repo, index) => (
-              <div key={index} 
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white rounded-lg hover:bg-[#faf8f6] transition-colors gap-4 sm:gap-0"
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={languageData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
               >
-                <div className="flex items-center gap-4">
-                  <div className="bg-[#f0e6ff] p-2 rounded-full">
-                    <GitBranch className="w-4 h-4 text-[#9f7aea]" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">{repo.name}</h4>
-                    <p className="text-sm text-muted-foreground">{repo.language}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 sm:gap-6">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-[#f6ad55]" />
-                    <span className="text-sm">{repo.stars}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <GitFork className="w-4 h-4 text-[#4a90e2]" />
-                    <span className="text-sm">{repo.forks}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{repo.updated}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                {languageData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>
