@@ -1,13 +1,52 @@
 'use client'
 
-import { sidebarLinks } from '@/constants'
-import { cn } from '@/lib/utils'
-import Image from 'next/image'
+import { 
+  Home,
+  ListTodo,
+  Code2,
+  Bot,
+  Network,
+  Settings,
+} from 'lucide-react';
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import Footer from './Footer'
 
-
+// Update the sidebar links to use Lucide icons
+const sidebarLinks = [
+  {
+    icon: <Home className="w-6 h-6" />,
+    route: "/",
+    label: "Home",
+  },
+  {
+    icon: <ListTodo className="w-6 h-6" />,
+    route: "/task",
+    label: "Tasks",
+  },
+  {
+    icon: <Code2 className="w-6 h-6" />,
+    route: "/snippets",
+    label: "Snippets",
+  },
+  {
+    icon: <Bot className="w-6 h-6" />,
+    route: "/ai",
+    label: "WARP AI",
+  },
+  {
+    icon: <Network className="w-6 h-6" />,
+    route: "/integrations",
+    label: "Integrations",
+  },
+  {
+    icon: <Settings className="w-6 h-6" />,
+    route: "/settings",
+    label: "Profile",
+  },
+];
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -33,15 +72,8 @@ const Sidebar = () => {
             <Link href={item.route} key={item.label}
               className={cn('sidebar-link', { 'bg-gray-200': isActive })}
             >
-              <div className="relative size-6">
-                <Image 
-                  src={item.imgURL}
-                  alt={item.label}
-                  fill
-                  className={cn({
-                    'brightness-[2] invert-0': isActive
-                  })}
-                />
+              <div className={cn("text-gray-400", { "text-gray-500": isActive })}>
+                {item.icon}
               </div>
               <p className={cn("sidebar-label", { "!text-gray-500": isActive })}>
                 {item.label}
@@ -49,7 +81,6 @@ const Sidebar = () => {
             </Link>
           )
         })}
-        
       </nav>
     </section>
   )

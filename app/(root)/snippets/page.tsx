@@ -119,7 +119,7 @@ const SnippetsPage = () => {
   return (
     <div className="min-h-screen bg-white p-4 sm:p-6 md:p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Code Snippets</h2>
+        <h2 className="text-2xl font-semibold text-gray-500 mb-4">Code Snippets</h2>
         <Card className="rounded-xl shadow-lg">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4">

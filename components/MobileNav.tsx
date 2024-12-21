@@ -4,17 +4,56 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetDescription,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { sidebarLinks } from "@/constants"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Footer from "./Footer"
+import { 
+  Menu,
+  Home,
+  ListTodo,
+  Code2,
+  Bot,
+  Network,
+  Settings,
+} from 'lucide-react';
+
+const sidebarLinks = [
+  {
+    icon: <Home className="w-5 h-5" />,
+    route: "/",
+    label: "Home",
+  },
+  {
+    icon: <ListTodo className="w-5 h-5" />,
+    route: "/task",
+    label: "Tasks",
+  },
+  {
+    icon: <Code2 className="w-5 h-5" />,
+    route: "/snippets",
+    label: "Snippets",
+  },
+  {
+    icon: <Bot className="w-5 h-5" />,
+    route: "/ai",
+    label: "WARP AI",
+  },
+  {
+    icon: <Network className="w-5 h-5" />,
+    route: "/integrations",
+    label: "Integrations",
+  },
+  {
+    icon: <Settings className="w-5 h-5" />,
+    route: "/settings",
+    label: "Profile",
+  },
+];
 
 const MobileNav = () => {
   const pathname = usePathname();
@@ -23,13 +62,7 @@ const MobileNav = () => {
     <section className="w-fulll max-w-[264px]">
       <Sheet>
         <SheetTrigger>
-          <Image
-            src="/icons/mobile-menu.svg"
-            width={25}
-            height={25}
-            alt="menu"
-            className="cursor-pointer mt-2"
-          />
+          <Menu className="w-6 h-6 text-gray-500 cursor-pointer mt-2" />
         </SheetTrigger>
         <SheetContent side="left" className="border-none bg-white">
           <Link href="/" className="cursor-pointer flex items-center gap-3 px-4">
@@ -44,37 +77,35 @@ const MobileNav = () => {
           </Link>
           <div className="mobilenav-sheet">
             <SheetClose asChild>
-              <nav className="flex h-full flex-col gap-6 pt-16 text-white">
-                  {sidebarLinks.map((item) => {
-                const isActive = pathname === item.route || pathname.startsWith(`${item.route}/`)
+              <nav className="flex h-full flex-col gap-6 pt-16">
+                {sidebarLinks.map((item) => {
+                  const isActive = pathname === item.route || pathname.startsWith(`${item.route}/`)
 
-                return (
-                  <SheetClose asChild key={item.route}>
-                    <Link href={item.route} key={item.label}
-                      className={cn('mobilenav-sheet_close w-full', { 'bg-gray-200': isActive })}
-                    >
-                        <Image 
-                          src={item.imgURL}
-                          alt={item.label}
-                          width={20}
-                          height={20}
-                          className={cn({
-                            'brightness-[3] invert-0': isActive
-                          })}
-                        />
-                      <p className={cn("text-16 font-semibold text-gray-300", { "text-gray-500": isActive })}>
-                        {item.label}
-                      </p>
-                    </Link>
-                  </SheetClose>
-                )
-              })}
-
-              USER
+                  return (
+                    <SheetClose asChild key={item.route}>
+                      <Link 
+                        href={item.route}
+                        className={cn('mobilenav-sheet_close w-full', {
+                          'bg-gray-200': isActive
+                        })}
+                      >
+                        <div className={cn("text-gray-400", {
+                          "text-gray-500": isActive
+                        })}>
+                          {item.icon}
+                        </div>
+                        <p className={cn("text-16 font-semibold text-gray-400", {
+                          "text-gray-500": isActive
+                        })}>
+                          {item.label}
+                        </p>
+                      </Link>
+                    </SheetClose>
+                  )
+                })}
               </nav>
             </SheetClose>
-
-            <Footer  />
+            <Footer />
           </div>
         </SheetContent>
       </Sheet>

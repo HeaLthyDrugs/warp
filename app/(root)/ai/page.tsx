@@ -7,7 +7,11 @@ import {
   User, 
   Brain,
   Sparkles,
-  BookOpen
+  BookOpen,
+  Code,
+  Search,
+  Loader2,
+  Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -16,75 +20,161 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import { getGeminiResponse } from '@/app/services/ai';
 
 interface Message {
   id: string;
   content: string;
   type: 'user' | 'ai';
   category?: 'standup' | 'learning' | 'general';
+  loading?: boolean;
 }
+
+const QUICK_PROMPTS = [
+  {
+    icon: <Brain className="w-4 h-4 mr-2" />,
+    label: "Daily Standup",
+    prompt: "Generate my daily standup summary",
+    className: "bg-white hover:bg-[#f0e6ff] text-[#9f7aea]"
+  },
+  {
+    icon: <BookOpen className="w-4 h-4 mr-2" />,
+    label: "Learning Path",
+    prompt: "Suggest a learning path for becoming a better developer",
+    className: "bg-white hover:bg-[#fff0e6] text-[#f6ad55]"
+  },
+  {
+    icon: <Code className="w-4 h-4 mr-2" />,
+    label: "Code Review",
+    prompt: "Help me review my code and suggest improvements",
+    className: "bg-white hover:bg-[#e6fff0] text-[#48bb78]"
+  },
+  {
+    icon: <Search className="w-4 h-4 mr-2" />,
+    label: "Debug Help",
+    prompt: "Help me debug an issue I'm facing with my code",
+    className: "bg-white hover:bg-[#ffe6e6] text-[#f56565]"
+  }
+];
 
 const AIChatPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       content: input,
       type: 'user'
     };
 
-    setMessages(prev => [...prev, newMessage]);
-    setInput('');
+    const aiMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: "Thinking...",
+      type: 'ai',
+      loading: true
+    };
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "I'm analyzing your request...",
-        type: 'ai'
-      };
-      setMessages(prev => [...prev, aiResponse]);
-    }, 500);
+    setMessages(prev => [...prev, userMessage, aiMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await getGeminiResponse(input);
+      
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMessage.id 
+          ? {
+              ...msg,
+              content: response,
+              loading: false
+            }
+          : msg
+      ));
+    } catch (error) {
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMessage.id 
+          ? {
+              ...msg,
+              content: "Sorry, I encountered an error. Please try again.",
+              loading: false
+            }
+          : msg
+      ));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-white p-4 sm:p-6 md:p-8">
-      {/* Header */}
-      <div className="mb-4 sm:mb-6 md:mb-8">
-            <h2 className="text-26 font-semibold text-gray-500">Ask me anything</h2>
+      {/* Updated Header */}
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <Image 
+            src="/icons/google-gemini-icon.svg" 
+            alt="Gemini AI" 
+            width={32} 
+            height={32}
+            className="rounded-lg"
+          />
+          <h2 className="text-2xl font-semibold text-gray-500">Chat with Gemini AI</h2>
+        </div>
+        <p className="text-gray-500">
+          Powered by Google's most capable AI model. Ask anything about coding, development, or general questions!
+        </p>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <Button 
-          variant="outline"
-          className="bg-white hover:bg-[#f0e6ff] text-[#9f7aea]"
-          onClick={() => setInput("Generate my daily standup summary")}
-        >
-          <Brain className="w-4 h-4 mr-2" />
-          Daily Standup
-        </Button>
-        <Button 
-          variant="outline"
-          className="bg-white hover:bg-[#fff0e6] text-[#f6ad55]"
-          onClick={() => setInput("Suggest learning resources for my skill level")}
-        >
-          <BookOpen className="w-4 h-4 mr-2" />
-          Learning Resources
-        </Button>
+      {/* Enhanced Quick Actions */}
+      <div className="mb-6">
+        <h3 className="text-sm font-medium text-gray-500 mb-3">Quick Prompts</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {QUICK_PROMPTS.map((prompt, index) => (
+            <Button 
+              key={index}
+              variant="outline"
+              className={cn("w-full justify-start", prompt.className)}
+              onClick={() => setInput(prompt.prompt)}
+            >
+              {prompt.icon}
+              {prompt.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
-      {/* Chat Container */}
+      {/* Chat Container - update the empty state */}
+      <AnimatePresence>
+        {messages.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="mt-8 text-center"
+          >
+            <div className="max-w-md mx-auto">
+              <Sparkles className="w-8 h-8 mx-auto mb-4 text-[#9f7aea]" />
+              <h3 className="text-lg font-medium text-gray-800 mb-2">
+                Start a Conversation with Gemini
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Ask about code reviews, debugging help, learning resources, or anything else!
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Existing chat messages container */}
       <Card className="mb-4 rounded-xl shadow-lg bg-white/50 backdrop-blur-sm">
         <CardContent className="p-4 min-h-[60vh] max-h-[60vh] overflow-y-auto">
           <AnimatePresence>
@@ -122,7 +212,14 @@ const AIChatPage = () => {
                       "text-sm",
                       message.type === 'user' ? 'text-white' : 'text-gray-800'
                     )}>
-                      {message.content}
+                      {message.loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="animate-pulse">Thinking</span>
+                          <span className="animate-bounce">...</span>
+                        </span>
+                      ) : (
+                        message.content
+                      )}
                     </p>
                     {message.category && (
                       <div className="mt-2">
@@ -150,7 +247,7 @@ const AIChatPage = () => {
         </CardContent>
       </Card>
 
-      {/* Input Area */}
+      {/* Enhanced Input Area */}
       <Card className="rounded-xl shadow-lg bg-white">
         <CardContent className="p-4">
           <div className="flex gap-3">
@@ -158,34 +255,28 @@ const AIChatPage = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask me anything..."
+              placeholder="Ask Gemini anything about coding, development, or general questions..."
               className="flex-1 bg-transparent border-none focus:ring-0"
+              disabled={isLoading}
             />
             <Button 
               onClick={handleSend}
               className="bg-[#9f7aea] hover:bg-[#8b5cf6] text-white"
-              disabled={!input.trim()}
+              disabled={!input.trim() || isLoading}
             >
-              <Send className="w-4 h-4" />
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </Button>
+          </div>
+          <div className="mt-2 text-xs text-gray-400 flex items-center gap-1">
+            <Info className="w-3 h-3" />
+            Powered by Google's Gemini AI
           </div>
         </CardContent>
       </Card>
-
-      {/* Floating Suggestion */}
-      <AnimatePresence>
-        {messages.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="mt-6 text-center text-muted-foreground"
-          >
-            <Sparkles className="w-5 h-5 mx-auto mb-2 text-[#f6ad55]" />
-            <p>Try asking for a daily standup summary or learning recommendations!</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

@@ -17,7 +17,7 @@ export const sidebarLinks = [
     {
         imgURL: "/icons/settings.svg",
         route: "/ai",
-        label: "WARP ai",
+        label: "WARP AI",
     },
     {
         imgURL: "/icons/eye.svg",
@@ -25,7 +25,7 @@ export const sidebarLinks = [
         label: "Integrations",
     },
     {
-        imgURL: "/icons/settings.svg",
+        imgURL: "/icons/layer.png",
         route: "/settings",
         label: "Profile",
     },
